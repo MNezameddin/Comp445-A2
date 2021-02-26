@@ -15,6 +15,7 @@ import logging
 
 import patterns
 import view
+import socket
 
 logging.basicConfig(filename='view.log', level=logging.DEBUG)
 logger = logging.getLogger()
@@ -22,10 +23,15 @@ logger = logging.getLogger()
 
 class IRCClient(patterns.Subscriber):
 
+
     def __init__(self):
         super().__init__()
         self.username = str()
         self._run = True
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host, port = 'Omars-MacBook-Pro.local', 8088
+        self.server_socket.connect((host,port))
+        self.server_socket.sendall(b'Hello, world')
 
     def set_view(self, view):
         self.view = view
