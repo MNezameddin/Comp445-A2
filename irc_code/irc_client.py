@@ -29,7 +29,8 @@ class IRCClient(patterns.Subscriber):
         self.username = str()
         self._run = True
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host, port = 'Omars-MacBook-Pro.local', 8088
+        #change the host according to OS 
+        host, port = 'localhost', 8088
         self.server_socket.connect((host,port))
         self.server_socket.sendall(b'Hello, world')
 
