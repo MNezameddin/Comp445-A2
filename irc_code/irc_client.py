@@ -28,9 +28,10 @@ class IRCClient(patterns.Subscriber):
         super().__init__()
         print("Please enter your Username: ")
         self.username = input()
+        if self.username == "":
+            self.username = "Anonymous"
         self._run = True
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #change the host according to OS 
         print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
         host = input()
         if host == '':
@@ -40,7 +41,8 @@ class IRCClient(patterns.Subscriber):
         if port == '':
             port = "8088"
         self.server_socket.connect((host,int(port)))
-        self.server_socket.sendall(b'Hello, world')
+        newUserLogin = "User \""+self.username+"\" has logged in!" 
+        self.server_socket.sendall(newUserLogin.encode())
 
     def set_view(self, view):
         self.view = view
@@ -54,6 +56,8 @@ class IRCClient(patterns.Subscriber):
             return
         logger.info(f"IRCClient.update -> msg: {msg}")
         self.process_input(msg)
+        usermsg = self.username + ": " + msg
+        self.server_socket.sendall(usermsg.encode())
 
     def process_input(self, msg):
         # Will need to modify this
@@ -69,7 +73,8 @@ class IRCClient(patterns.Subscriber):
         """
         Driver of your IRC Client
         """
-        self.add_msg("Welcome to #general chat!")
+        welcomeMsg = "Welcome " + self.username + " to #general chat!"
+        self.view.add_msg("Server", welcomeMsg)
 
         
 
