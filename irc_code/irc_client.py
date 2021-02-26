@@ -30,8 +30,15 @@ class IRCClient(patterns.Subscriber):
         self._run = True
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #change the host according to OS 
-        host, port = 'localhost', 8088
-        self.server_socket.connect((host,port))
+        print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
+        host = input()
+        if host == '':
+            host = "localhost"
+        print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
+        port = input()
+        if port == '':
+            port = "8088"
+        self.server_socket.connect((host,int(port)))
         self.server_socket.sendall(b'Hello, world')
 
     def set_view(self, view):

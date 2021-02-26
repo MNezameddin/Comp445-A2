@@ -8,7 +8,10 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setblocking(False)
         #change the host according to OS 
-        host = 'localhost'
+        print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
+        host = input()
+        if host == '':
+            host = "localhost"
         print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
         port = input()
         if port == '':
