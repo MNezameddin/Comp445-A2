@@ -26,7 +26,8 @@ class IRCClient(patterns.Subscriber):
 
     def __init__(self):
         super().__init__()
-        self.username = str()
+        print("Please enter your Username: ")
+        self.username = input()
         self._run = True
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #change the host according to OS 
@@ -68,10 +69,9 @@ class IRCClient(patterns.Subscriber):
         """
         Driver of your IRC Client
         """
-        # Remove this section in your code, simply for illustration purposes
-        for x in range(10):
-            self.add_msg(f"call after View.loop: {x}")
-            await asyncio.sleep(2)
+        self.add_msg("Welcome to #general chat!")
+
+        
 
     def close(self):
         # Terminate connection
