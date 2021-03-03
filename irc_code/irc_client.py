@@ -41,8 +41,6 @@ class IRCClient(patterns.Subscriber):
         if port == '':
             port = "8088"
         self.server_socket.connect((host,int(port)))
-        newUserLogin = "User \""+self.username+"\" has logged in!" 
-        self.server_socket.sendall(newUserLogin.encode())
 
     def set_view(self, view):
         self.view = view
@@ -55,11 +53,13 @@ class IRCClient(patterns.Subscriber):
             # Empty string
             return
         logger.info(f"IRCClient.update -> msg: {msg}")
-        self.process_input(msg)
         usermsg = self.username + ": " + msg
         self.server_socket.sendall(usermsg.encode())
         data = self.server_socket.recv(512)
-        self.process_input(data.decode())
+        server_data = data.decode()
+        server_user = server_data.split(": ", 1)
+        server_msg = server_user[1]
+        self.process_input(server_msg)        
 
     def process_input(self, msg):
         # Will need to modify this
