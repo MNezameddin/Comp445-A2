@@ -50,7 +50,11 @@ class Server:
                         if data:
                             print("Received data: {}".format(data))
                             self.messages[r] += data
+                            print(self.messages[r])
                             self._parse_message(r)
+                            print(self._parse_message(r))
+                            print("Sending message to client: {}".format(data.encode()))
+                            r.send(data.encode())
                         else:
                             print("Removing client socket from watchlists")
                             self.potential_reads.remove(r)

@@ -58,6 +58,8 @@ class IRCClient(patterns.Subscriber):
         self.process_input(msg)
         usermsg = self.username + ": " + msg
         self.server_socket.sendall(usermsg.encode())
+        data = self.server_socket.recv(512)
+        self.process_input(data.decode())
 
     def process_input(self, msg):
         # Will need to modify this
