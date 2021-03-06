@@ -16,6 +16,7 @@ import logging
 import patterns
 import view
 import socket
+import select
 
 logging.basicConfig(filename='view.log', level=logging.DEBUG)
 logger = logging.getLogger()
@@ -26,21 +27,30 @@ class IRCClient(patterns.Subscriber):
 
     def __init__(self):
         super().__init__()
+        print("Please enter your Nick: ")
+        self.nick = input()
         print("Please enter your Username: ")
         self.username = input()
         if self.username == "":
             self.username = "Anonymous"
+
         self._run = True
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        #Asking user for HOST input
         print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
         host = input()
         if host == '':
             host = "localhost"
+        #Asking user for PORT input
         print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
         port = input()
         if port == '':
             port = "8088"
+
+        userinfo= "nick:" + self.nick + ":username:" + self.username
         self.server_socket.connect((host,int(port)))
+        self.server_socket.send(userinfo.encode())
 
     def set_view(self, view):
         self.view = view
@@ -53,23 +63,26 @@ class IRCClient(patterns.Subscriber):
             # Empty string
             return
         logger.info(f"IRCClient.update -> msg: {msg}")
+        #sends to server
         usermsg = self.username + ": " + msg
         self.server_socket.sendall(usermsg.encode())
+        #receives from server
         data = self.server_socket.recv(512)
         server_data = data.decode()
-        server_user = server_data.split(": ", 1)
-        server_msg = server_user[1]
-        self.process_input(server_msg)        
+        self.process_input(server_data)      
 
     def process_input(self, msg):
         # Will need to modify this
-        self.add_msg(msg)
-        if msg.lower().startswith('/quit'):
+        if '/quit' in msg.lower():
             # Command that leads to the closure of the process
             raise KeyboardInterrupt
+        self.add_msg(msg)
 
     def add_msg(self, msg):
-        self.view.add_msg(self.username, msg)
+        server_user = msg.split(": ", 1)
+        server_username = server_user[0]
+        server_msg = server_user[1]
+        self.view.add_msg(server_username, server_msg)
 
     async def run(self):
         """
@@ -77,15 +90,13 @@ class IRCClient(patterns.Subscriber):
         """
         welcomeMsg = "Welcome " + self.username + " to #general chat!"
         self.view.add_msg("Server", welcomeMsg)
-
-        
+                    
 
     def close(self):
         # Terminate connection
         logger.debug(f"Closing IRC Client object")
         pass
-
-
+            
 
 def main(args):
     # Pass your arguments where necessary
@@ -102,7 +113,7 @@ def main(args):
                 v.run(),
                 client.run(),
                 return_exceptions=True,
-            )
+            )            
         try:
             asyncio.run( inner_run() )
         except KeyboardInterrupt as e:
