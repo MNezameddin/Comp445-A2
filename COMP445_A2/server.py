@@ -2,6 +2,11 @@ import socket
 import select
 import time
 
+class Channel:
+    def __init__(self):
+        self.clients = list()
+        self.nick = list()
+
 class Server:
 
     def __init__(self):
@@ -29,11 +34,12 @@ class Server:
         self.potential_errors = list()
         self.outbox = dict()
         self.messages = dict()
+
         
 
     def run(self):
         print("Server running...")
-    
+        global_channel = Channel()
         while True:
             r_reads, r_writes, r_errors= select.select(self.potential_reads, self.potential_writes, self.potential_errors)
             for r in r_reads:
@@ -45,11 +51,19 @@ class Server:
                     self.outbox[client_socket] = list()
                     self.messages[client_socket] = str()
                     self.potential_reads.append(client_socket)
+                    global_channel.clients.append(client_socket)
                     
                     # reading from clients
                 else:
                     data = r.recv(self.read_size).decode('utf-8')
                     if data:
+                        if hasattr(data, "nick:"):
+                            nick_message = data.split("nick:", 1)
+                            nickname = nick_message[1]
+                            global_channel.nick.append(nickname)
+                            for i in global_channel.nick[]:
+                                print(i)
+
                         print("Received data: {}".format(data))
                         self.messages[r] += data
                         self._parse_message(r)
