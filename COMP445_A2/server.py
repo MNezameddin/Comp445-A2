@@ -1,6 +1,7 @@
 import socket
 import select
 import time
+import argparse
 
 class Channel:
     def __init__(self):
@@ -12,16 +13,21 @@ class Server:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setblocking(False)
-        
-        print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
-        host = input()
-        if host == '':
-            host = "Omars-MacBook-Pro.local"
+        parser = argparse.ArgumentParser()
+        # parser.add_argument("-h", "--help", help="help")
+        parser.add_argument("-port", "--port", help="Port")
+        args = parser.parse_args()
+        # host = args.host
+        port = args.port
+        # print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
+        # host = input()
+        # if host == '':
+        host = "Omars-MacBook-Pro.local"
 
-        print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
-        port = input()
-        if port == '':
-            port = "8088"
+        # print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
+        # port = input()
+        # if port == '':
+        #     port = "8088"
 
         self.server_socket.bind((host, int(port)))
         self.server_socket.listen(0)
@@ -61,7 +67,7 @@ class Server:
                             nick_message = data.split("nick:", 1)
                             nickname = nick_message[1]
                             global_channel.nick.append(nickname)
-                            for i in global_channel.nick[]:
+                            for i in global_channel.nick:
                                 print(i)
 
                         print("Received data: {}".format(data))

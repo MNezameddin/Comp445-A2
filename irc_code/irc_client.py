@@ -17,6 +17,7 @@ import patterns
 import view
 import socket
 import select
+import argparse
 
 logging.basicConfig(filename='view.log', level=logging.DEBUG)
 logger = logging.getLogger()
@@ -27,6 +28,13 @@ class IRCClient(patterns.Subscriber):
 
     def __init__(self):
         super().__init__()
+        parser = argparse.ArgumentParser()
+    # parser.add_argument("-h", "--help", help="help")
+        parser.add_argument("-host", "--host", help="Host")
+        parser.add_argument("-port", "--port", help="Port")
+        args = parser.parse_args()
+        host = args.host
+        port = args.port
         print("Please enter your Nick: ")
         self.nick = input()
         print("Please enter your Username: ")
@@ -38,15 +46,15 @@ class IRCClient(patterns.Subscriber):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         #Asking user for HOST input
-        print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
-        host = input()
-        if host == '':
-            host = "localhost"
-        #Asking user for PORT input
-        print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
-        port = input()
-        if port == '':
-            port = "8088"
+        # print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
+        # host = input()
+        # if host == '':
+        #     host = "Omars-MacBook-Pro.local"
+        # #Asking user for PORT input
+        # print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
+        # port = input()
+        # if port == '':
+        #     port = "8088"
 
         userinfo= "nick:" + self.nick + ":username:" + self.username
         self.server_socket.connect((host,int(port)))
@@ -100,7 +108,13 @@ class IRCClient(patterns.Subscriber):
 
 def main(args):
     # Pass your arguments where necessary
+    # parser = argparse.ArgumentParser()
+    # # parser.add_argument("-h", "--help", help="help")
+    # parser.add_argument("-host", "--host", help="Host")
+    # parser.add_argument("-port", "--port", help="Port")
     client = IRCClient()
+    # host.client = host
+    # port.client = port
     logger.info(f"Client object created")
     with view.View() as v:
         logger.info(f"Entered the context of a View object")
