@@ -55,15 +55,15 @@ class IRCClient(patterns.Subscriber):
             
 
     def process_input(self, msg):
-        server_user = msg.split(": ", 1)
-        server_username = server_user[0]
-        server_msg = server_user[1]
+        # server_user = msg.split(": ", 1)
+        # server_username = server_user[0]
+        # server_msg = server_user[1]
         # Will need to modify this
-        if '/quit' in server_msg.lower():
-            if self.username == server_username:
-                print("quitting")
-                self.server_socket.close()
-                # Command that leads to the closure of the process
+        if '/quit' in msg.lower():
+            # if self.username == server_username:
+            #     print("quitting")
+            #     self.server_socket.close()
+            #     # Command that leads to the closure of the process
                 raise KeyboardInterrupt
         else:
             logger.info(f"Sending {msg} message to server")
@@ -72,7 +72,8 @@ class IRCClient(patterns.Subscriber):
 
     def add_msg(self, msg):
         #fetching msg from server and parsing the username and message
-        server_user = msg.split(": ", 1)
+        server_user = msg.split(": ",1)
+        logger.info(f"Sending {msg}in addmessage")
         server_username = server_user[0]
         server_msg = server_user[1]
         self.view.add_msg(server_username, server_msg)
@@ -84,6 +85,7 @@ class IRCClient(patterns.Subscriber):
                 ready = select.select([self.server_socket], [], [], 0.5)
                 if ready:
                     data = self.server_socket.recv(512)
+                    logger.info(f"{data.decode()}in server_update")
                     self.add_msg(data.decode())
             except KeyboardInterrupt as e:
                 logger.debug(f"Signifies end of process")

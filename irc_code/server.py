@@ -12,7 +12,7 @@ class Server:
         parser.add_argument("-port", "--port", help="Port")
         args = parser.parse_args()
         port = args.port
-        host = "localhost"
+        host = "Omars-MacBook-Pro.local"
 
         self.server_socket.bind((host, int(port)))
         self.server_socket.listen(0)
