@@ -18,6 +18,7 @@ import view
 import socket
 import select
 import argparse
+from _thread import start_new_thread
 
 logging.basicConfig(filename='view.log', level=logging.DEBUG)
 logger = logging.getLogger()
@@ -49,8 +50,8 @@ class IRCClient(patterns.Subscriber):
             return
         logger.info(f"IRCClient.update -> msg: {msg}")
         #sends to server
-        usermsg = self.username + ": " + msg
-        self.server_socket.sendall(usermsg.encode())
+        # usermsg = self.username + ": " + msg
+        self.process_input(msg)
         #receives from server
         # data = self.server_socket.recv(512)
         # server_data = data.decode()
@@ -61,14 +62,34 @@ class IRCClient(patterns.Subscriber):
         if '/quit' in msg.lower():
             # Command that leads to the closure of the process
             raise KeyboardInterrupt
-        self.add_msg(msg)
+        else:
+
+            logger.info(f"Sending {msg} message to server")
+            
+
+            self.server_socket.sendall(msg.encode())
 
     def add_msg(self, msg):
-        server_user = msg.split(": ", 1)
-        server_username = server_user[0]
-        server_msg = server_user[1]
-        self.view.add_msg(server_username, server_msg)
+        # server_user = msg.split(": ", 1)
+        # server_username = server_user[0]
+        # server_msg = server_user[1]
+        self.view.add_msg(self.username, msg)
+    def listen_socket(self):
 
+        self.add_msg('before socket')
+
+        while True:
+            try:
+                ready = select.select([self.server_socket], [], [], 0.5)
+
+                if ready:
+                    logger.debug(f"in listen socket loop")
+
+                    data = self.server_socket.recv(512)
+
+                    self.add_msg(data.decode())
+            except KeyboardInterrupt as e:
+                logger.debug(f"Signifies end of process")
     async def run(self):
         """
         Driver of your IRC Client
@@ -83,6 +104,8 @@ class IRCClient(patterns.Subscriber):
         self.server_socket.connect((self.host,int(self.port)))
         logger.debug(f"socket connected")
         self.server_socket.send(userinfo.encode())
+        # self.server_socket.setblocking(0)
+        start_new_thread(self.listen_socket, ())
                     
 
     def close(self):
