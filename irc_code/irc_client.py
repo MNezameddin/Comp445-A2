@@ -30,7 +30,6 @@ class IRCClient(patterns.Subscriber):
 
     def __init__(self):
         super().__init__()
-        logger.debug(f"hello there")
         self.host = args.host
         logger.debug(f"added newhost {args.host}")
         self.port = args.port
@@ -55,15 +54,9 @@ class IRCClient(patterns.Subscriber):
             
 
     def process_input(self, msg):
-        # server_user = msg.split(": ", 1)
-        # server_username = server_user[0]
-        # server_msg = server_user[1]
         # Will need to modify this
         if '/quit' in msg.lower():
-            # if self.username == server_username:
-            #     print("quitting")
-            #     self.server_socket.close()
-            #     # Command that leads to the closure of the process
+                 # Command that leads to the closure of the process
                 raise KeyboardInterrupt
         else:
             logger.info(f"Sending {msg} message to server")
@@ -93,15 +86,12 @@ class IRCClient(patterns.Subscriber):
         """
         Driver of your IRC Client
         """
-        logger.debug(f"added yuhost {self.host}")
-        logger.debug(f"added port {self.port}")
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.debug(f"socket added")
         userinfo= "nick:" + self.nick + ":username:" + self.username
         self.server_socket.connect((self.host,int(self.port)))
         logger.debug(f"socket connected")
         self.server_socket.send(userinfo.encode())
-        # self.server_socket.setblocking(0)
         start_new_thread(self.server_update, ())
                     
 
