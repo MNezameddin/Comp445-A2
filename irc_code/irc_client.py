@@ -21,6 +21,7 @@ import argparse
 
 logging.basicConfig(filename='view.log', level=logging.DEBUG)
 logger = logging.getLogger()
+parser = argparse.ArgumentParser()
 
 
 class IRCClient(patterns.Subscriber):
@@ -28,37 +29,13 @@ class IRCClient(patterns.Subscriber):
 
     def __init__(self):
         super().__init__()
-        parser = argparse.ArgumentParser()
-    # parser.add_argument("-h", "--help", help="help")
-        parser.add_argument("-host", "--host", help="Host")
-        parser.add_argument("-port", "--port", help="Port")
-        args = parser.parse_args()
-        host = args.host
-        port = args.port
-        print("Please enter your Nick: ")
-        self.nick = input()
-        print("Please enter your Username: ")
-        self.username = input()
-        if self.username == "":
-            self.username = "Anonymous"
-
+        logger.debug(f"hello there")
+        self.host = args.host
+        logger.debug(f"added newhost {args.host}")
+        self.port = args.port
+        self.nick = args.nick
+        self.username = args.username
         self._run = True
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        #Asking user for HOST input
-        # print("If you would like to input a Host to connect to, please enter it below. You can press \"Enter\" to use default values.")
-        # host = input()
-        # if host == '':
-        #     host = "Omars-MacBook-Pro.local"
-        # #Asking user for PORT input
-        # print("If you would like to input a port to bind to, please enter it below. You can press \"Enter\" to use default values.")
-        # port = input()
-        # if port == '':
-        #     port = "8088"
-
-        userinfo= "nick:" + self.nick + ":username:" + self.username
-        self.server_socket.connect((host,int(port)))
-        self.server_socket.send(userinfo.encode())
 
     def set_view(self, view):
         self.view = view
@@ -75,9 +52,9 @@ class IRCClient(patterns.Subscriber):
         usermsg = self.username + ": " + msg
         self.server_socket.sendall(usermsg.encode())
         #receives from server
-        data = self.server_socket.recv(512)
-        server_data = data.decode()
-        self.process_input(server_data)      
+        # data = self.server_socket.recv(512)
+        # server_data = data.decode()
+        # self.process_input(server_data)      
 
     def process_input(self, msg):
         # Will need to modify this
@@ -96,8 +73,16 @@ class IRCClient(patterns.Subscriber):
         """
         Driver of your IRC Client
         """
-        welcomeMsg = "Welcome " + self.username + " to #general chat!"
-        self.view.add_msg("Server", welcomeMsg)
+        # welcomeMsg = "Welcome " + self.username + " to #general chat!"
+        logger.debug(f"added yuhost {self.host}")
+        logger.debug(f"added port {self.port}")
+        # self.view.add_msg("Server", welcomeMsg)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        logger.debug(f"socket added")
+        userinfo= "nick:" + self.nick + ":username:" + self.username
+        self.server_socket.connect((self.host,int(self.port)))
+        logger.debug(f"socket connected")
+        self.server_socket.send(userinfo.encode())
                     
 
     def close(self):
@@ -108,13 +93,9 @@ class IRCClient(patterns.Subscriber):
 
 def main(args):
     # Pass your arguments where necessary
-    # parser = argparse.ArgumentParser()
-    # # parser.add_argument("-h", "--help", help="help")
-    # parser.add_argument("-host", "--host", help="Host")
-    # parser.add_argument("-port", "--port", help="Port")
+    logger.debug(f"added host {args.host}")
     client = IRCClient()
-    # host.client = host
-    # port.client = port
+
     logger.info(f"Client object created")
     with view.View() as v:
         logger.info(f"Entered the context of a View object")
@@ -136,5 +117,9 @@ def main(args):
 
 if __name__ == "__main__":
     # Parse your command line arguments here
-    args = None
+    parser.add_argument("-host", "--host", help="Host")
+    parser.add_argument("-port", "--port", help="Port")
+    parser.add_argument("-nick", "--nick", help="nick")
+    parser.add_argument("-username", "--username", help="port")
+    args = parser.parse_args()
     main(args)
