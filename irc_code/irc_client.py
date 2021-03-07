@@ -49,44 +49,41 @@ class IRCClient(patterns.Subscriber):
             # Empty string
             return
         logger.info(f"IRCClient.update -> msg: {msg}")
-        #sends to server
-        # usermsg = self.username + ": " + msg
-        self.process_input(msg)
-        #receives from server
-        # data = self.server_socket.recv(512)
-        # server_data = data.decode()
-        # self.process_input(server_data)      
-
-    def process_input(self, msg):
-        # Will need to modify this
-        if '/quit' in msg.lower():
-            # Command that leads to the closure of the process
-            raise KeyboardInterrupt
-        else:
-
-            logger.info(f"Sending {msg} message to server")
+        #convert message with username before sending it to the server
+        usermsg = self.username + ": " + msg
+        self.process_input(usermsg)
             
 
+    def process_input(self, msg):
+        server_user = msg.split(": ", 1)
+        server_username = server_user[0]
+        server_msg = server_user[1]
+        # Will need to modify this
+        if '/quit' in server_msg.lower():
+            if self.username == server_username:
+                print("quitting")
+                self.server_socket.close()
+                # Command that leads to the closure of the process
+                raise KeyboardInterrupt
+        else:
+            logger.info(f"Sending {msg} message to server")
+            print("sending messages")
             self.server_socket.sendall(msg.encode())
 
     def add_msg(self, msg):
-        # server_user = msg.split(": ", 1)
-        # server_username = server_user[0]
-        # server_msg = server_user[1]
-        self.view.add_msg(self.username, msg)
-    def listen_socket(self):
+        #fetching msg from server and parsing the username and message
+        server_user = msg.split(": ", 1)
+        server_username = server_user[0]
+        server_msg = server_user[1]
+        self.view.add_msg(server_username, server_msg)
 
-        self.add_msg('before socket')
-
+    #creates new thread which will listen for new data from the server
+    def server_update(self):
         while True:
             try:
                 ready = select.select([self.server_socket], [], [], 0.5)
-
                 if ready:
-                    logger.debug(f"in listen socket loop")
-
                     data = self.server_socket.recv(512)
-
                     self.add_msg(data.decode())
             except KeyboardInterrupt as e:
                 logger.debug(f"Signifies end of process")
@@ -94,10 +91,8 @@ class IRCClient(patterns.Subscriber):
         """
         Driver of your IRC Client
         """
-        # welcomeMsg = "Welcome " + self.username + " to #general chat!"
         logger.debug(f"added yuhost {self.host}")
         logger.debug(f"added port {self.port}")
-        # self.view.add_msg("Server", welcomeMsg)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.debug(f"socket added")
         userinfo= "nick:" + self.nick + ":username:" + self.username
@@ -105,7 +100,7 @@ class IRCClient(patterns.Subscriber):
         logger.debug(f"socket connected")
         self.server_socket.send(userinfo.encode())
         # self.server_socket.setblocking(0)
-        start_new_thread(self.listen_socket, ())
+        start_new_thread(self.server_update, ())
                     
 
     def close(self):
